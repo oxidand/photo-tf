@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "localstack.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "localstack.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
+      name: edge
+      nodePort: {{ .Values.service.nodePort }}
+    {{- range untilStep (.Values.service.externalServicePorts.start|int) (.Values.service.externalServicePorts.end|int) 1 }}
+    - name: "external-service-port-{{ . }}"
+      port: {{ . }}
+      targetPort: "ext-svc-{{ . }}"
+    {{- end }}
+  selector:
+    {{- include "localstack.selectorLabels" . | nindent 4 }}

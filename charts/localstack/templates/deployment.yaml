@@ -1,0 +1,84 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "localstack.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "localstack.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "localstack.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "localstack.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "localstack.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: edge
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            {{- range untilStep (.Values.service.externalServicePorts.start|int) (.Values.service.externalServicePorts.end|int) 1 }}
+            - name: "ext-svc-{{ . }}"
+              containerPort: {{ . }}
+              protocol: TCP
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+            httpGet:
+              path: /_localstack/health
+              port: edge
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+            httpGet:
+              path: /_localstack/health
+              port: edge
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/localstack
+          env:
+            - name: DEBUG
+              value: "0"
+            - name: PERSISTENCE
+              value: "1"
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ include "localstack.fullname" . }}

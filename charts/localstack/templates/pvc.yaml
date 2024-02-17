@@ -1,0 +1,14 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "localstack.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "localstack.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "1Gi"
