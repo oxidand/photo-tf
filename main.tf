@@ -19,13 +19,13 @@ terraform {
 
 provider "helm" {
   kubernetes {
-    config_path = var.kube_config_path
+    config_path = var.KUBE_CONFIG_PATH
   }
 }
 
 resource "helm_release" "localstack" {
-  name             = var.stack_name
-  namespace        = var.stack_name
+  name             = var.STACK_NAME
+  namespace        = var.STACK_NAME
   create_namespace = true
 
   # repository = "https://helm.localstack.cloud"
