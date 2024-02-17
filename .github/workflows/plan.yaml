@@ -20,9 +20,9 @@ jobs:
       TF_VAR_KUBE_CONTEXT: ${{ vars.KUBE_CONTEXT }}
       TF_VAR_KUBE_CONFIG_PATH: ${{ vars.KUBE_CONFIG_PATH }}
     steps:
-      - name: start minikube
-        id: minikube
-        uses: medyagh/setup-minikube@master
+      # - name: start minikube
+      #   id: minikube
+      #   uses: medyagh/setup-minikube@master
 
       - name: Checkout
         uses: actions/checkout@v4
