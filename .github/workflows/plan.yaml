@@ -32,14 +32,5 @@ jobs:
       - name: Terraform init
         run: terraform init
       
-      - id: plan
+      - name: Plan
         run: terraform plan -no-color
-      
-      - name: Output
-        run: echo ${{ steps.apply.outputs.stdout }}
-      
-      - name: Errors
-        run: echo ${{ steps.apply.outputs.stderr }}
-      
-      - name: Exit Code
-        run: echo ${{ steps.apply.outputs.exitcode }}

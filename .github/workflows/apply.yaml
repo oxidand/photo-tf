@@ -12,6 +12,14 @@ jobs:
   apply:
     name: Apply
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_AWS_ACCESS_KEY: ${{ vars.AWS_ACCESS_KEY }}
+      TF_VAR_AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      TF_VAR_AWS_REGION: ${{ vars.AWS_REGION }}
+      TF_VAR_S3_ENDPOINT: ${{ vars.S3_ENDPOINT }}
+      TF_VAR_STACK_NAME: ${{ vars.STACK_NAME }}
+      TF_VAR_KUBE_CONTEXT: ${{ vars.KUBE_CONTEXT }}
+      TF_VAR_KUBE_CONFIG_PATH: ${{ vars.KUBE_CONFIG_PATH }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,12 +32,3 @@ jobs:
       
       - id: Apply
         run: terraform apply -auto-approve -no-color
-      
-      - name: Output
-        run: echo ${{ steps.apply.outputs.stdout }}
-      
-      - name: Errors
-        run: echo ${{ steps.apply.outputs.stderr }}
-      
-      - name: Exit Code
-        run: echo ${{ steps.apply.outputs.exitcode }}
